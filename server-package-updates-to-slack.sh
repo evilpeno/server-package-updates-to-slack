@@ -19,13 +19,13 @@
 
 # ==== CONFIGURATION =========================================================
 
-# How often you are running this in cron (must match the same frequecy. This string needs to be in the format unix date command can parse, eg:
+# How often you are running this in cron (must match the same frequency. This string needs to be in the format unix date command can parse, eg:
 # 1 hour
 # 2 hours
 # 15 minutes
 FREQUENCY="15 minutes"
 
-# Slack Hook Url to post the slack message to. Commented out here as I set it on the server as an enviroment variable, you could either do that or
+# Slack Hook url to post the slack message to. Commented out here as I set it on the server as an environment variable, you could either do that or
 # uncomment and add your own Slack API Hook url here:
 # SLACK_HOOK_URL="https://hooks.slack.com/services/foo/bar"
 
@@ -35,7 +35,7 @@ SLACK_POST_THUMBNAIL="https://i.imgur.com/3J4gkcPl.png"
 SLACK_POST_USERNAME="updates-bot"
 
 # Name of the server to use in the slack message title. By default below we're using the servers' own hostname, feel free to swap it to a 
-# string if theres something you'd rather use to identify the server instead.
+# string if there's something you'd rather use to identify the server instead.
 SERVERNAME=$(hostname)
 
 # ==== END OF CONFIGURATION =========================================================
@@ -52,7 +52,7 @@ if [ "$UNAME" == "linux" ]; then
         export DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
     # Otherwise, use release info file
     else
-        export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+        export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "release" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
     fi
 fi
 # For everything else (or if above failed), just use generic identifier
@@ -88,13 +88,25 @@ elif [[ ${DISTRO,,} == *"ubuntu"* ]] ; then
             echo "$PACKAGE    ($DATETIMESTR)\n" >> /tmp/package-updates-slack-announce.txt
         fi
     done
+# --------------- DEAL WITH PACKAGES INSTALLED IF LINUX DISTRIBUTION IS DEBIAN ------------------
+
+elif [[ ${DISTRO,,} == *"debian"* ]] ; then
+
+    cat /var/log/dpkg.log | grep "\ installed\ " | tail -n 30 | while read -a linearray ; do
+        PACKAGE="${linearray[3]} ${linearray[4]} ${linearray[5]}"
+        DATETIMESTR="${linearray[0]} ${linearray[1]}"
+        INSTALLTIME=$(date --date="$DATETIMESTR" +"%s")
+        if [ "$INSTALLTIME" -ge "$LASTFREQUENCY" ]; then
+            echo "$PACKAGE    ($DATETIMESTR)\n" >> /tmp/package-updates-slack-announce.txt
+        fi
+    done
     
 # --------------- OTHER LINUX DISTROS ARE UNTESTED - ABORT. ------------------    
 else
     echo "ERROR: Untested/unsupported linux distro - Centos/Redhat/Ubuntu currently supported, feel free to amend for other distros and submit a PR."
 fi
 
-# --------------- IF PACKAGED WERE INSTALLED (THERES A TEMPORARY FILE WITH THEM LISTED IN IT) THEN SEND A SLACK NOTIFICATION. -------------
+# --------------- IF PACKAGED WERE INSTALLED (THERE'S A TEMPORARY FILE WITH THEM LISTED IN IT) THEN SEND A SLACK NOTIFICATION. -------------
 if [ -f /tmp/package-updates-slack-announce.txt ]; then
 
     echo "$NOWTIME - notifying updates to slack..."
