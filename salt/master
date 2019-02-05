@@ -1,0 +1,3 @@
+reactor:
+  - salt/beacon/*/inotify//var/log/dpkg.log:
+      - /srv/salt/reactor/aptupdate.sls
