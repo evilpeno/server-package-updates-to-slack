@@ -12,3 +12,7 @@ Place the script itself in your salt directory, I've generalized the location fo
 You can quickly apply the state to a minion `salt minion state.apply aptupdateslack`
 
 If you wanted, you could call this from your top.sls as well and apply via `state.highstate`.
+
+## Credits
+Debian & SaltStack states by Nick Brooks : @evilpeno on github, 
+beacon & events debugging assisted from Trevor Sharpe : @tsharpe on github
