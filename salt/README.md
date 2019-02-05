@@ -1,7 +1,7 @@
 ##SaltStack Setup
 
-You can use the examples here to have your SaltStack(https://www.saltstack.com/) minion send a beacon back
-to a SaltStack(https://www.saltstack.com/) master reactor to call this script
+You can use the examples here to have your SaltStack (https://www.saltstack.com/) minion send a beacon back
+to a master reactor to call this script.
 
 * master - Add this reactor statement into your master config file.
 * aptupdate.sls - This is your reactor sls, place in your reactor folder. ex. `/srv/salt/reactor/aptupdate.sls`
